@@ -4,38 +4,82 @@
 }
 
 <div class="container-fluid py-4">
+    <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>📋 Liste des invités</h1>
-        <a asp-action="Create" class="btn btn-primary">
-            ➕ Ajouter un invité
+        <div>
+            <h1 class="page-title mb-1">
+                <i class="fas fa-users"></i> Liste des invités
+            </h1>
+            <p class="text-muted mb-0">Gérez vos invitations et confirmations</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary btn-create">
+            <i class="fas fa-plus"></i> Ajouter un invité
         </a>
     </div>
 
     <!-- Statistiques rapides -->
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <div class="card bg-light">
-                <div class="card-body text-center">
-                    <h5>@Model.TotalGuests invités</h5>
-                    <p class="mb-0 text-muted">@Model.TotalPeople personnes au total</p>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);">
+                    <i class="fas fa-user-friends"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.TotalGuests</div>
+                    <div class="stat-label">Invités enregistrés</div>
+                    <div class="stat-detail">@Model.TotalPeople personnes au total</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.Guests.Count(g => g.Status == Web.Models.RsvpStatus.Confirmed)</div>
+                    <div class="stat-label">Confirmés</div>
+                    <div class="stat-detail">Présences confirmées</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.Guests.Count(g => g.Status == Web.Models.RsvpStatus.Pending)</div>
+                    <div class="stat-label">En attente</div>
+                    <div class="stat-detail">Réponses attendues</div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Filtres -->
-    <div class="card mb-4">
-        <div class="card-body">
+    <div class="filter-card mb-4">
+        <div class="filter-header">
+            <i class="fas fa-filter"></i>
+            <h5>Filtres de recherche</h5>
+        </div>
+        <div class="filter-body">
             <form method="get" asp-action="Index">
                 <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Recherche</label>
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label">
+                            <i class="fas fa-search"></i> Recherche
+                        </label>
                         <input type="text" class="form-control" name="searchTerm"
                                value="@Model.SearchTerm" placeholder="Nom, prénom ou email">
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">Statut</label>
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label">
+                            <i class="fas fa-flag"></i> Statut
+                        </label>
                         <select class="form-select" name="statusFilter">
                             <option value="">Tous les statuts</option>
                             <option value="0" selected="@(Model.StatusFilter == Web.Models.RsvpStatus.Pending)">En attente</option>
@@ -44,8 +88,10 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">Table</label>
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label">
+                            <i class="fas fa-table"></i> Table
+                        </label>
                         <select class="form-select" name="tableFilter">
                             <option value="">Toutes les tables</option>
                             <option value="0">Sans table</option>
@@ -58,8 +104,10 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">Groupe</label>
+                    <div class="col-md-6 col-lg-3">
+                        <label class="form-label">
+                            <i class="fas fa-heart"></i> Groupe
+                        </label>
                         <select class="form-select" name="groupFilter">
                             <option value="">Tous les groupes</option>
                             @foreach (var group in Model.Groups)
@@ -70,102 +118,149 @@
                     </div>
                 </div>
 
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-primary">🔍 Filtrer</button>
-                    <a asp-action="Index" class="btn btn-secondary">🔄 Réinitialiser</a>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo"></i> Réinitialiser
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Tableau des invités -->
-    <div class="card">
-        <div class="card-body">
+    <div class="guests-table-card">
+        <div class="table-card-header">
+            <i class="fas fa-list"></i>
+            <h5>Liste complète (@Model.Guests.Count() invité(s))</h5>
+        </div>
+        <div class="table-card-body">
             @if (Model.Guests.Any())
             {
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table guests-table">
                         <thead>
                             <tr>
-                                <th>Nom complet</th>
-                                <th>Email</th>
-                                <th>Groupe</th>
-                                <th class="text-center">Personnes</th>
-                                <th>Statut</th>
-                                <th>Table</th>
-                                <th>Contraintes</th>
+                                <th>
+                                    <i class="fas fa-user"></i> Nom complet
+                                </th>
+                                <th>
+                                    <i class="fas fa-envelope"></i> Email
+                                </th>
+                                <th>
+                                    <i class="fas fa-heart"></i> Groupe
+                                </th>
+                                <th class="text-center">
+                                    <i class="fas fa-users"></i> Pers.
+                                </th>
+                                <th>
+                                    <i class="fas fa-flag"></i> Statut
+                                </th>
+                                <th>
+                                    <i class="fas fa-table"></i> Table
+                                </th>
+                                <th class="text-center">
+                                    <i class="fas fa-utensils"></i>
+                                </th>
                                 <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var guest in Model.Guests)
                             {
-                                <tr>
+                                <tr class="guest-row">
                                     <td>
-                                        <strong>@guest.FullName</strong>
+                                        <div class="guest-name">
+                                            <i class="fas fa-user-circle"></i>
+                                            <strong>@guest.FullName</strong>
+                                        </div>
                                     </td>
                                     <td>
-                                        <small class="text-muted">@guest.Email</small>
+                                        <div class="guest-email">
+                                            @guest.Email
+                                        </div>
                                     </td>
                                     <td>
                                         @if (!string.IsNullOrWhiteSpace(guest.GroupFamily))
                                         {
-                                            <span class="badge bg-info">@guest.GroupFamily</span>
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-secondary">@guest.NumberOfPeople</span>
-                                    </td>
-                                    <td>
-                                        @if (guest.Status == Web.Models.RsvpStatus.Confirmed)
-                                        {
-                                            <span class="badge bg-success">✅ Confirmé</span>
-                                        }
-                                        else if (guest.Status == Web.Models.RsvpStatus.Declined)
-                                        {
-                                            <span class="badge bg-danger">❌ Refusé</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-warning">⏳ En attente</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (guest.Table != null)
-                                        {
-                                            <span class="badge bg-primary">@guest.Table.Name</span>
+                                            <span class="badge-group">
+                                                <i class="fas fa-heart"></i> @guest.GroupFamily
+                                            </span>
                                         }
                                         else
                                         {
                                             <span class="text-muted">-</span>
                                         }
                                     </td>
+                                    <td class="text-center">
+                                        <span class="badge-count">@guest.NumberOfPeople</span>
+                                    </td>
                                     <td>
+                                        @if (guest.Status == Web.Models.RsvpStatus.Confirmed)
+                                        {
+                                            <span class="status-badge confirmed">
+                                                <i class="fas fa-check-circle"></i> Confirmé
+                                            </span>
+                                        }
+                                        else if (guest.Status == Web.Models.RsvpStatus.Declined)
+                                        {
+                                            <span class="status-badge declined">
+                                                <i class="fas fa-times-circle"></i> Refusé
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge pending">
+                                                <i class="fas fa-clock"></i> En attente
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (guest.Table != null)
+                                        {
+                                            <span class="badge-table">
+                                                <i class="fas fa-chair"></i> @guest.Table.Name
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Non assigné</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
                                         @if (!string.IsNullOrWhiteSpace(guest.DietaryRestrictions))
                                         {
-                                            <span title="@guest.DietaryRestrictions">🍽️</span>
+                                            <span class="dietary-icon" title="@guest.DietaryRestrictions">
+                                                <i class="fas fa-utensils"></i>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
                                         }
                                     </td>
                                     <td class="text-end">
-                                        <div class="btn-group btn-group-sm">
+                                        <div class="action-buttons">
                                             <a asp-action="Details" asp-route-id="@guest.Id"
-                                               class="btn btn-sm btn-outline-info" title="Détails">
-                                                👁️
+                                               class="btn-action-table details" title="Détails">
+                                                <i class="fas fa-eye"></i>
                                             </a>
                                             <a asp-action="Edit" asp-route-id="@guest.Id"
-                                               class="btn btn-sm btn-outline-primary" title="Modifier">
-                                                ✏️
+                                               class="btn-action-table edit" title="Modifier">
+                                                <i class="fas fa-edit"></i>
                                             </a>
                                             <form asp-action="ResendInvitation" asp-route-id="@guest.Id"
                                                   method="post" style="display:inline;">
-                                                <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                                <button type="submit" class="btn-action-table send"
                                                         title="Renvoyer l'invitation">
-                                                    📧
+                                                    <i class="fas fa-envelope"></i>
                                                 </button>
                                             </form>
                                             <a asp-action="Delete" asp-route-id="@guest.Id"
-                                               class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                                🗑️
+                                               class="btn-action-table delete" title="Supprimer">
+                                                <i class="fas fa-trash"></i>
                                             </a>
                                         </div>
                                     </td>
@@ -177,16 +272,34 @@
             }
             else
             {
-                <div class="text-center py-5">
-                    <p class="text-muted">Aucun invité trouvé avec ces critères.</p>
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-user-slash"></i>
+                    </div>
+                    <h3>Aucun invité trouvé</h3>
+                    <p>
+                        @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.StatusFilter.HasValue ||
+                       Model.TableFilter.HasValue || !string.IsNullOrEmpty(Model.GroupFilter))
+                        {
+                            <span>Aucun invité ne correspond à vos critères de recherche.</span>
+                        }
+                        else
+                        {
+                            <span>Commencez par ajouter votre premier invité.</span>
+                        }
+                    </p>
                     @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.StatusFilter.HasValue ||
                    Model.TableFilter.HasValue || !string.IsNullOrEmpty(Model.GroupFilter))
                     {
-                        <a asp-action="Index" class="btn btn-primary">Voir tous les invités</a>
+                        <a asp-action="Index" class="btn btn-primary btn-create">
+                            <i class="fas fa-list"></i> Voir tous les invités
+                        </a>
                     }
                     else
                     {
-                        <a asp-action="Create" class="btn btn-primary">Ajouter le premier invité</a>
+                        <a asp-action="Create" class="btn btn-primary btn-create">
+                            <i class="fas fa-plus"></i> Ajouter le premier invité
+                        </a>
                     }
                 </div>
             }
@@ -199,9 +312,23 @@
         // Confirmation avant suppression
         document.querySelectorAll('a[href*="Delete"]').forEach(link => {
             link.addEventListener('click', function(e) {
-                if (!confirm('Êtes-vous sûr de vouloir supprimer cet invité ?')) {
+                if (!confirm('Êtes-vous sûr de vouloir supprimer cet invité ?\n\nCette action est irréversible.')) {
                     e.preventDefault();
                 }
+            });
+        });
+
+        // Animation au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('.guest-row');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 30);
             });
         });
     </script>
